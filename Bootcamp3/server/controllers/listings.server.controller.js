@@ -56,26 +56,82 @@ exports.read = function(req, res) {
 /* Update a listing - note the order in which this function is called by the router*/
 exports.update = function(req, res) {
   var listing = req.listing;
-
   /* Replace the listings's properties with the new properties found in req.body */
- 
+    if (req.body.code) {
+        listing.code = req.body.code;
+    }
+    if (req.body.name) {
+        listing.name = req.body.name;
+    }
+    if (req.body.coordinates) {
+        listing.coordinates = req.body.coordinates;
+    }
+    if (req.body.address) {
+        listing.address = req.body.address;
+    }
+
+
+
   /*save the coordinates (located in req.results if there is an address property) */
- 
-  /* Save the listing */
+   if (req.results) {
+        listing.coordinates = {
+            latitude: req.results.lat,
+            longitude: req.results.lng
+        };
+   }
+
+    /* Save the listing */
+    listing.save(function (err) {
+        if (err) {
+            console.log(err);
+            res.status(400).send(err);
+        } else {
+            res.json(listing);
+            console.log(listing)
+        }
+    });
+
+    
+
 
 };
 
 /* Delete a listing */
 exports.delete = function(req, res) {
-  var listing = req.listing;
+    var listing = req.listing;
+    Listing.findOneAndRemove({ "code": listing.code }, function (err, listing) {
+        if (err) {
+            console.log(err);
+            res.status(400).send(err);
+        }
+        else {
+            res.json(listing);
+            console.log(listing);
+        }
+    });
+
+
+
 
   /* Add your code to remove the listins */
 
 };
 
 /* Retreive all the directory listings, sorted alphabetically by listing code */
-exports.list = function(req, res) {
-  /* Add your code */
+exports.list = function (req, res) {
+    /* Add your code */
+
+
+    Listing.find({}, function (err, listings) {
+        if (err) {
+            console.log(err);
+            res.status(400).send(err);
+        }
+        else {
+            res.json(listings);
+            console.log(listings);
+        }
+    }).sort('code');
 };
 
 /* 

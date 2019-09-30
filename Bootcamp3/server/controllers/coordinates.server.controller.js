@@ -24,15 +24,44 @@ module.exports = function(req, res, next) {
       }, function(error, response, body) {
         //For ideas about response and error processing see https://opencagedata.com/tutorials/geocode-in-nodejs
         
-        //JSON.parse to get contents. Remember to look at the response's JSON format in open cage data
-        
+          //JSON.parse to get contents. Remember to look at the response's JSON format in open cage data
+          //console.log(JSON.stringify(response));
+          //console.log(JSON.stringify(response.statusCode));
+
+          if (error) {
+              console.log(error);
+              res.status(400).send(error);
+          }
+
+          var responseBody = JSON.parse(body);
+          console.log(JSON.stringify(responseBody));
+          //console.log(responseBody.status.code == 200);
+          if (responseBody.status.code == 200) {
+
+              var resultsArray = responseBody.results;
+              if (resultsArray == undefined || resultsArray.length == 0) {
+                  // array empty or does not exist
+                  console.log("cannot find results");
+              }
+              else {
+                  var coordinates = responseBody.results[0].geometry;
+                  req.results = coordinates;
+                  console.log("hi");
+              }
+              
+              //console.log(JSON.stringify(coordinates));
+          }
+          else {
+              console.log("error retrieving coordinates");
+          }
+         
         /*Save the coordinates in req.results -> 
           this information will be accessed by listings.server.model.js 
           to add the coordinates to the listing request to be saved to the database.
 
           Assumption: if we get a result we will take the coordinates from the first result returned
         */
-        //  req.results = stores you coordinates
+
         next();
     });
   } else {
